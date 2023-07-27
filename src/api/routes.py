@@ -29,15 +29,27 @@ def add_term():
     db.session.commit() #añadir la info a la tabla
     return jsonify({"msg": "new term added succesfully"}), 200
 
-@api.route('terms/<term>', methods=['GET'])
+@api.route('/terms/<term>', methods=['GET'])
 def get_one_term(term):
     data = Terms.query.filter_by(term = term).first()
+    if not data:
+        return jsonify({"msg": "term doesn't exist in database"}), 404
     return jsonify(data.serialize()), 200 #aquí sí podemos decirle que nos devuelva el serialize directamente porque nos está devolviendo un sólo término
 
-@api.route('terms/<string:name>', methods=['DELETE'])
+@api.route('/terms/<string:name>', methods=['DELETE'])
 def delete_individual_term(name): 
     term = Terms.query.filter_by(term = name).first()
     db.session.delete(term)
     db.session.commit()
     return jsonify({"msg": "término eliminado con éxito"}), 200
+
+@api.route('/terms/<term>', methods=['PUT'])
+def update_term(term):
+    body = request.json #necesitamos el cuerpo porque ahí estará la definición que vamos a cambiar
+    term_to_modify = Terms.query.filter_by(term = term).first()
+    term_to_modify.term = body["term"]
+    term_to_modify.definition = body["definition"]
+    db.session.commit()
+    return jsonify({"msg": "término modificado con éxito"}), 200
+
     

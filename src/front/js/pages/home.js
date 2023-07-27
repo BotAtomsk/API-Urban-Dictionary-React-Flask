@@ -10,12 +10,15 @@ export const Home = () => {
 	const [definition, setDefinition] = useState("")
 	//const [singleTerm, setSingleTerm] = useState({})
 	const [showClearButton, setShowClearButton] = useState(false)
+	const [showModifyButton, setShowModifyButton] = useState(false)
+	const [showContainer, setShowContainer] = useState(false)
 	const [showIndividualDeleteButton, setShowIndividualDeleteButton] = useState(false)
 	const handleGetAll = async () => {
 		const resp = await fetch("https://botatomsk-studious-space-giggle-wpwpq7p94j6f675-3001.preview.app.github.dev/api/terms")
 		const data = await resp.json()
 		setAllTerms(data)
 		setShowClearButton(true)
+		setShowContainer(true)
 	}
 	const handleAdd = async (e) => {
 		e.preventDefault()
@@ -33,6 +36,7 @@ export const Home = () => {
 		const data = await resp.json()
 		console.log(data)
 		setShowClearButton(false)
+		setShowContainer(false)
 		setDefinition("")
 		setSearchAdd("")
 	}
@@ -43,9 +47,12 @@ export const Home = () => {
 			const data = await resp.json()
 			//setSingleTerm(data)
 			setDefinition(data.definition)
-			setShowIndividualDeleteButton(true)	
+			setShowIndividualDeleteButton(true)
+			setShowModifyButton(true)
 		} catch (error) {
 			setDefinition("The term you are searching for doesn't exist...")
+			setShowIndividualDeleteButton(false)
+			setShowModifyButton(false)
 		}
 		setShowClearButton(true)
 	}
@@ -54,7 +61,9 @@ export const Home = () => {
 		setSearchAdd("")
 		setDefinition("")
 		setShowClearButton(false)
+		setShowModifyButton(false)
 		setShowIndividualDeleteButton(false)
+		setShowContainer(false)
 	}
 	const handleIndividualDelete = async (e, name) => {
 		e.preventDefault(e)
@@ -71,7 +80,25 @@ export const Home = () => {
 		setSearchAdd("")
 		setDefinition("")
 		setShowClearButton(false)
+		setShowModifyButton(false)
 		setShowIndividualDeleteButton(false)
+		setShowContainer(false)
+	}
+	const handleModify = async (e, term) => {
+		e.preventDefault()
+		const opt = {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				term: searchAdd,
+				definition: definition
+			})
+		}
+		const resp = await fetch("https://botatomsk-studious-space-giggle-wpwpq7p94j6f675-3001.preview.app.github.dev/api/terms/" + term, opt)
+		const data = await resp.json()
+		console.log(data)
 	}
 
 	return (
@@ -88,12 +115,13 @@ export const Home = () => {
 				<div className="d-flex justify-content-between py-3">
 					<button className="btn btn-primary" onClick={e=> handleAdd(e)}>Add</button>
 					{showClearButton && <button className="btn btn-danger" onClick={e=> handleClear(e)}>Clear</button>}
+					{showModifyButton && <button className="btn btn-primary" onClick={e=> handleModify(e, searchAdd)}>Modify</button>}
 					{showIndividualDeleteButton && <button className="btn btn-danger" onClick={e=> handleIndividualDelete(e, searchAdd)}>Delete</button>}
 					<button className="btn btn-success" onClick={e=>handleSearch(e)}>Search</button>
 				</div>
 			</form>
 			<div id="conjunto" className="container">
-				{showClearButton && allTerms && allTerms.map(el => <div className="container">
+				{showContainer && allTerms && allTerms.map(el => <div className="container">
 					<button className="btn btn-danger" onClick={e=> handleIndividualDelete(e, el.term)}>X</button>
 					<p className="fs-4">{el.term}</p>
 					<p>{el.definition}</p>
