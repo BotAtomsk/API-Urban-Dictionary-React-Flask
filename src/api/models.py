@@ -14,6 +14,24 @@ class User(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.email,
+            "email": self.email
             # do not serialize the password, its a security breach
         }
+
+class Terms(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    term = db.Column(db.String(120), unique=True, nullable=False)
+    definition = db.Column(db.String(500), unique=False, nullable=False)
+    
+
+    def __repr__(self):
+        return f'<Term {self.term}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "term": self.term,
+            "definition": self.definition
+        }
+
+    
